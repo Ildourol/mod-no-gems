@@ -1,11 +1,5 @@
-/*
- * Copyright (C) 2026+ AzerothCore Project
- * Released under GNU AGPL v3 license.
- */
-
-void AddNoGemsScripts();
-
+// mod-no-gems is implemented as a server-side Lua module under mod-ale / Eluna.
+// This empty loader satisfies AzerothCore's module registration when compiled as a static module.
 void Addmod_no_gemsScripts()
 {
-    AddNoGemsScripts();
 }
