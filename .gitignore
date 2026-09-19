@@ -1,0 +1,13 @@
+# Runtime files
+*.user
+*.user.*
+*.suo
+*.sln
+*.vcxproj
+*.vcxproj.filters
+bin/
+build/
+CMakeLists.txt.user
+.vscode/
+.idea/
+*.log
