@@ -1,5 +1,12 @@
-// mod-no-gems is implemented as a server-side Lua module under mod-ale / Eluna.
-// This empty loader satisfies AzerothCore's module registration when compiled as a static module.
+void AddNoGemsWorldScripts();
+void AddNoGemsLootScripts();
+void AddNoGemsPlayerScripts();
+void AddNoGemsCommandScripts();
+
 void Addmod_no_gemsScripts()
 {
+    AddNoGemsWorldScripts();
+    AddNoGemsLootScripts();
+    AddNoGemsPlayerScripts();
+    AddNoGemsCommandScripts();
 }

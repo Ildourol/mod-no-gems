@@ -1,0 +1,84 @@
+#
+# mod-no-gems Configuration File
+#
+
+[worldserver]
+
+###################################################################################################
+# MOD-NO-GEMS SETTINGS
+#
+#    ModNoGems.Enable
+#        Description: Enable or disable the mod-no-gems module entirely.
+#        Default:     1 - Enabled
+#                     0 - Disabled
+#
+
+ModNoGems.Enable = 1
+
+#
+#    ModNoGems.ConvertLegacyGearOnLogin
+#        Description: Automatically scans player bags and equipped gear on login and cleanses
+#                     any legacy socketed gem enchantments.
+#        Default:     1 - Enabled
+#                     0 - Disabled
+#
+
+ModNoGems.ConvertLegacyGearOnLogin = 1
+
+#
+#    ModNoGems.BlockGemUse
+#        Description: Prevent players from using or interacting with gem items (ItemClass 3).
+#        Default:     1 - Enabled
+#                     0 - Disabled
+#
+
+ModNoGems.BlockGemUse = 1
+
+#
+#    ModNoGems.StatMultiplier
+#        Description: Multiplier applied to all replacement affix stat budgets.
+#                     Recommended presets:
+#                       0.3 - Conservative / slight boost
+#                       0.5 - Balanced (Recommended)
+#                       1.0 - Full epic gem power (High power)
+#        Default:     0.5
+#
+
+ModNoGems.StatMultiplier = 0.5
+
+#
+#    ModNoGems.MetaMultiplier
+#        Description: Additional multiplier specifically applied to meta socket replacement budgets.
+#                     1.0 = Meta socket gives the same modest stats as 1 normal socket.
+#                     0.0 = Meta sockets give ZERO stats (removed entirely).
+#        Default:     1.0
+#
+
+ModNoGems.MetaMultiplier = 1.0
+
+#
+#    ModNoGems.IncludeSocketBonus
+#        Description: Fold original item socket bonuses into the replacement stats.
+#        Default:     1 - Enabled
+#                     0 - Disabled
+#
+
+ModNoGems.IncludeSocketBonus = 1
+
+#
+#    ModNoGems.SocketBonusMultiplier
+#        Description: Multiplier applied to folded socket bonuses (e.g., 0.5 = 50% value).
+#        Default:     0.5
+#
+
+ModNoGems.SocketBonusMultiplier = 0.5
+
+#
+#    ModNoGems.Debug
+#        Description: Enable verbose debug logging during server startup and template creation.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+#
+
+ModNoGems.Debug = 0
+

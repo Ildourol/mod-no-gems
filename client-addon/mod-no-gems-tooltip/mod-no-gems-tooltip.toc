@@ -1,8 +1,0 @@
-## Interface: 30300
-## Title: No Gems Tooltip
-## Notes: Displays server-side randomized socket replacement affixes on item tooltips.
-## Author: mod-no-gems
-## Version: 1.0.0
-## SavedVariables: NoGemsTooltipCache
-
-mod-no-gems-tooltip.lua
