@@ -2,7 +2,7 @@
 
 ![mod-no-gems](banner.jpg)
 
-An in-memory socket elimination and native stat replacement module for AzerothCore (WotLK 3.3.5a).
+mod-no-gems is an AzerothCore WotLK module that removes gem sockets from items at server startup and replaces their socket value with balanced native item stats. It works entirely in memory, requires no client addon or database item overrides, preserves socket-bonus value, cleans legacy gemmed gear, and is compatible with Playerbots.
 
 ## Overview
 
