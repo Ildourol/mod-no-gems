@@ -352,10 +352,19 @@ namespace NoGemsFormula
                 proto->ItemStat[proto->StatsCount].ItemStatValue = amount;
                 proto->StatsCount++;
             }
-            else if (!foundExisting && proto->StatsCount > 0)
+            else if (!foundExisting)
             {
                 // Overflow protection: fold into first stat so budget is never lost
-                proto->ItemStat[0].ItemStatValue += amount;
+                if (proto->StatsCount > 0)
+                {
+                    proto->ItemStat[0].ItemStatValue += amount;
+                }
+                else if (MAX_ITEM_PROTO_STATS > 0)
+                {
+                    proto->ItemStat[0].ItemStatType = modType;
+                    proto->ItemStat[0].ItemStatValue = amount;
+                    proto->StatsCount = 1;
+                }
             }
         }
 

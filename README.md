@@ -12,16 +12,18 @@ Unlike traditional custom item solutions that require SQL table overrides, synth
 
 ## Features
 
-- In-Memory Template Processing: Transforms all socketed item templates in memory when the world server initializes. The world database remains completely pristine and unmodified.
-- Native Blizzard Tooltip Display: Primary attributes (Strength, Agility, Stamina, Intellect, Spirit) are rendered as standard white base stats. Combat ratings (Critical Strike, Haste, Hit, Armor Penetration, Defense, etc.) and Attack/Spell Power are rendered as standard green Equip lines.
-- Automatic Tooltip Stat Grouping: Base stats and equip lines are automatically sorted and grouped so that white attributes always appear together at the top of the tooltip, and green equip effects appear together at the bottom.
-- Synergistic Stat Selection: Replacement affixes are dynamically selected based on socket color and the item's existing stat archetype (for example, red sockets on caster gear grant spell power or intellect, while red sockets on plate gear grant strength or attack power).
-- Socket Bonus Preservation: Original item socket bonuses from DBC enchantment records are scaled and folded into the item stats before sockets are cleared.
-- Legacy Gear Cleansing: On player login, any existing items equipped, in inventory bags, or in the bank are scanned and cleansed of legacy socket enchantments.
-- Character Sheet Recalculation: On login, all equipment mods are unapplied and reapplied to ensure complete synchronization of player attributes, combat ratings, and client update fields.
-- Item Class Safeguard: Direct usage and socketing of gem items as well as belt socket upgrade items are blocked to prevent accidental loss of materials.
-- Playerbot Compatible: AI playerbots natively recognize items as having zero sockets and evaluate upgraded gear accurately using standard stat weight calculations.
-- Zero Client Addons: Works with completely unmodified 3.3.5a game clients out of the box.
+- **In-Memory Template Processing**: Transforms all socketed item templates in memory when the world server initializes. The world database remains completely pristine and unmodified.
+- **Native Blizzard Tooltip Display**: Primary attributes (Strength, Agility, Stamina, Intellect, Spirit) are rendered as standard white base stats. Combat ratings (Critical Strike, Haste, Hit, Armor Penetration, Defense, etc.) and Attack/Spell Power are rendered as standard green Equip lines.
+- **Automatic Tooltip Stat Grouping**: Base stats and equip lines are automatically sorted and grouped so that white attributes always appear together at the top of the tooltip, and green equip effects appear together at the bottom.
+- **Synergistic Stat Selection**: Replacement affixes are dynamically selected based on socket color and the item's existing stat archetype (for example, red sockets on caster gear grant spell power or intellect, while red sockets on plate gear grant strength or attack power).
+- **Socket Bonus Preservation**: Original item socket bonuses from DBC enchantment records are scaled and folded into the item stats before sockets are cleared.
+- **High-Performance Login Pipeline**: Scans equipped, bag, and bank items cleanly on login. Stat recalculations (`_RemoveAllItemMods()` / `_ApplyAllItemMods()`) execute **only** when legacy gems are actually cleansed, completely eliminating login lag spikes and packet floods for regular logins.
+- **Immediate Client & Database Synchronization**: Cleansed items are instantly synchronized to client tooltips via `item->SendUpdateToPlayer()` and flagged for persistent database storage (`ITEM_CHANGED`).
+- **Dynamic Template Synergy**: Provides thread-safe, double-checked locking (`std::shared_mutex`) to seamlessly cleanse dynamically generated or scaled items on-the-fly (e.g. via `mod-item-level-scaling`).
+- **Memory Optimized**: Pre-allocated hash structures and lean in-memory backups eliminate heap fragmentation and table rehashing during world startup.
+- **Item Class Safeguard**: Direct usage and socketing of gem items as well as belt socket upgrade items are blocked to prevent accidental loss of materials.
+- **Playerbot Compatible**: AI playerbots natively recognize items as having zero sockets and evaluate upgraded gear accurately using standard stat weight calculations.
+- **Zero Client Addons & Zero Core Edits**: Works with completely unmodified 3.3.5a game clients and without touching a single line of core AzerothCore code.
 
 ## Requirements
 
@@ -71,7 +73,7 @@ The module includes a command suite accessible by Game Masters (Security Level 3
 - `.nogems reload`: Reloads the module configuration file without restarting the world server.
 - `.nogems stats`: Displays the total number of item templates modified in memory.
 - `.nogems info <itemId>`: Shows the original socket configuration, socket bonus ID, and stats count for a given item entry.
-- `.nogems cleanse <player>`: Manually purges legacy gem enchantments from a targeted or specified player and recalculates their character sheet attributes.
+- `.nogems cleanse <player>`: Manually purges legacy gem enchantments from a targeted or specified player across their equipped items, inventory bags, and bank, updating client tooltips and recalculating their character sheet attributes.
 
 ## Client Cache Notice
 

@@ -3,6 +3,9 @@
 #include "NoGemsFormula.h"
 #include "ObjectMgr.h"
 #include "Log.h"
+#include "Player.h"
+#include "Item.h"
+#include "Bag.h"
 
 NoGemsRegistry* NoGemsRegistry::instance()
 {
@@ -23,6 +26,7 @@ void NoGemsRegistry::Initialize()
     }
 
     std::unique_lock<std::shared_mutex> lock(_lock);
+    _backupData.reserve(3000);
     uint32 modifiedCount = 0;
 
     for (auto const& pair : *itemTemplates)
@@ -42,7 +46,6 @@ void NoGemsRegistry::Initialize()
         backup.StatsCount = proto.StatsCount;
         for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
             backup.ItemStat[i] = proto.ItemStat[i];
-        backup.Description = proto.Description;
 
         _backupData[proto.ItemId] = backup;
 
@@ -88,6 +91,13 @@ bool NoGemsRegistry::CheckAndModifyDynamicTemplate(ItemTemplate* proto)
     if (!proto || !sNoGemsConfig->Enable || !NoGemsFormula::HasSockets(proto))
         return false;
 
+    // Fast-path read check: avoid acquiring exclusive lock if template already converted
+    {
+        std::shared_lock<std::shared_mutex> readLock(_lock);
+        if (_backupData.find(proto->ItemId) != _backupData.end())
+            return false;
+    }
+
     std::unique_lock<std::shared_mutex> lock(_lock);
     if (_backupData.find(proto->ItemId) != _backupData.end())
         return false;
@@ -99,9 +109,101 @@ bool NoGemsRegistry::CheckAndModifyDynamicTemplate(ItemTemplate* proto)
     backup.StatsCount = proto->StatsCount;
     for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
         backup.ItemStat[i] = proto->ItemStat[i];
-    backup.Description = proto->Description;
 
     _backupData[proto->ItemId] = backup;
     return NoGemsFormula::ApplyNoGems(proto);
+}
+
+bool NoGemsRegistry::CleanseItemGems(Player* player, Item* item)
+{
+    if (!item)
+        return false;
+
+    bool hadGems = false;
+    for (uint32 s = SOCK_ENCHANTMENT_SLOT; s <= PRISMATIC_ENCHANTMENT_SLOT; ++s)
+    {
+        if (item->GetEnchantmentId(EnchantmentSlot(s)) != 0)
+        {
+            item->ClearEnchantment(EnchantmentSlot(s));
+            hadGems = true;
+        }
+    }
+
+    if (hadGems && player)
+    {
+        item->SetState(ITEM_CHANGED, player);
+        if (item->IsEquipped())
+        {
+            player->_ApplyItemMods(item, item->GetSlot(), false);
+            player->_ApplyItemMods(item, item->GetSlot(), true);
+        }
+        item->SendUpdateToPlayer(player);
+    }
+
+    return hadGems;
+}
+
+bool NoGemsRegistry::CleanseAllPlayerItems(Player* player)
+{
+    if (!player)
+        return false;
+
+    bool anyGemsCleansed = false;
+
+    // 1. Equipped items
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+    {
+        if (CleanseItemGems(player, player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot)))
+            anyGemsCleansed = true;
+    }
+
+    // 2. Main bag
+    for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+    {
+        if (CleanseItemGems(player, player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot)))
+            anyGemsCleansed = true;
+    }
+
+    // 3. Extra equipped bags & bag contents
+    for (uint8 bagSlot = INVENTORY_SLOT_BAG_START; bagSlot < INVENTORY_SLOT_BAG_END; ++bagSlot)
+    {
+        Bag* bag = player->GetBagByPos(bagSlot);
+        if (bag)
+        {
+            for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot)
+            {
+                if (CleanseItemGems(player, bag->GetItemByPos(slot)))
+                    anyGemsCleansed = true;
+            }
+        }
+    }
+
+    // 4. Bank items
+    for (uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; ++slot)
+    {
+        if (CleanseItemGems(player, player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot)))
+            anyGemsCleansed = true;
+    }
+
+    for (uint8 bagSlot = BANK_SLOT_BAG_START; bagSlot < BANK_SLOT_BAG_END; ++bagSlot)
+    {
+        Bag* bag = player->GetBagByPos(bagSlot);
+        if (bag)
+        {
+            for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot)
+            {
+                if (CleanseItemGems(player, bag->GetItemByPos(slot)))
+                    anyGemsCleansed = true;
+            }
+        }
+    }
+
+    if (anyGemsCleansed)
+    {
+        player->_RemoveAllItemMods();
+        player->_ApplyAllItemMods();
+    }
+
+    return anyGemsCleansed;
 }
 

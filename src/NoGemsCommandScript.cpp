@@ -64,21 +64,12 @@ public:
             return false;
         }
 
-        // Cleanse equipped items
-        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
-        {
-            Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-            if (item)
-            {
-                for (uint32 s = SOCK_ENCHANTMENT_SLOT; s <= PRISMATIC_ENCHANTMENT_SLOT; ++s)
-                    item->ClearEnchantment(EnchantmentSlot(s));
-            }
-        }
+        bool cleansed = NoGemsRegistry::CleanseAllPlayerItems(player);
+        if (cleansed)
+            handler->PSendSysMessage("Cleanse completed and stats recalculated for player %s (items in gear, bags, and bank were updated).", player->GetName().c_str());
+        else
+            handler->PSendSysMessage("Player %s already has no gem enchantments.", player->GetName().c_str());
 
-        player->_RemoveAllItemMods();
-        player->_ApplyAllItemMods();
-
-        handler->PSendSysMessage("Cleanse completed and stats recalculated for player %s.", player->GetName().c_str());
         return true;
     }
 

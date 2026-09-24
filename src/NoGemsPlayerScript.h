@@ -14,9 +14,6 @@ public:
     void OnPlayerLogin(Player* player) override;
     void OnPlayerEquip(Player* player, Item* item, uint8 bag, uint8 slot, bool update) override;
     bool OnPlayerCanUseItem(Player* player, ItemTemplate const* proto, InventoryResult& result) override;
-
-private:
-    void CleanseItemGems(Player* player, Item* item);
 };
 
 void AddNoGemsPlayerScripts();

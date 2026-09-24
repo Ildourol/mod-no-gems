@@ -7,13 +7,15 @@
 #include <shared_mutex>
 #include <string>
 
+class Player;
+class Item;
+
 struct ItemSocketBackup
 {
     _Socket Socket[MAX_ITEM_PROTO_SOCKETS];
     uint32 socketBonus{0};
     uint32 StatsCount{0};
     _ItemStat ItemStat[MAX_ITEM_PROTO_STATS];
-    std::string Description;
 };
 
 class NoGemsRegistry
@@ -45,6 +47,9 @@ public:
     }
 
     bool CheckAndModifyDynamicTemplate(ItemTemplate* proto);
+
+    static bool CleanseItemGems(Player* player, Item* item);
+    static bool CleanseAllPlayerItems(Player* player);
 
 private:
     NoGemsRegistry() = default;
